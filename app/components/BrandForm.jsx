@@ -19,8 +19,8 @@ export default function BrandForm({ onSubmit, isLoading }) {
   };
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-gray-900/50 border border-cyan-500/30 rounded-2xl p-8 backdrop-blur-sm shadow-xl">
+    <div className="w-full max-w-xl mx-auto px-4 py-6">
+      <div className="bg-gray-900/50 border border-cyan-500/30 rounded-2xl p-10 backdrop-blur-sm shadow-xl">
         {/* Header */}
         <div className="text-center mb-8">
           <h1 className="text-4xl font-bold mb-3 bg-gradient-to-r from-cyan-400 to-purple-400 bg-clip-text text-transparent">

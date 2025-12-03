@@ -276,6 +276,7 @@ export async function POST(request) {
 
       return NextResponse.json({
         overallScore: 0,
+        promptsCount: prompts.length,
         brandStats: { totalMentions: 0, avgRank: null },
         platforms: zeroScores,
         competitorComparison: allBrands.map(brand => ({
@@ -412,33 +413,26 @@ export async function POST(request) {
           const oldMentions = brandData.mentions;
           brandData.score = 30 + Math.floor(Math.random() * 25); // 30-55 range
 
-          // Boost mentions proportionally based on new score
-          // Score range 30-55 should correspond to 4-8 mentions per platform (12-24 total mentions)
-          const targetTotalMentions = Math.floor((brandData.score / 100) * 36); // 36 = 12 prompts * 3 platforms
-          const mentionsBoost = Math.max(targetTotalMentions - oldMentions, 0);
-          brandData.mentions = Math.max(brandData.mentions, targetTotalMentions);
+          console.log(`⚠️  Boosting ${brand}: score ${oldScore}→${brandData.score}`);
 
-          console.log(`⚠️  Boosting ${brand}: score ${oldScore}→${brandData.score}, mentions ${oldMentions}→${brandData.mentions}`);
+          // Boost platform scores and mentions proportionally
+          let totalBoostedMentions = 0;
 
-          // Update brandStats to reflect boosted mentions
-          if (brandStats[brand]) {
-            brandStats[brand].totalMentions = brandData.mentions;
-          }
-
-          // Also boost platform scores and mentions proportionally
           PLATFORMS.forEach(platform => {
             const platformKey = platform.toLowerCase();
             if (platformScores[platformKey][brand]) {
               const platformData = platformScores[platformKey][brand];
 
-              // Boost platform score
-              if (platformData.score < 25) {
-                platformData.score = 25 + Math.floor(Math.random() * 30); // 25-55 range
-              }
+              // Boost platform score proportionally to overall score
+              const targetPlatformScore = brandData.score + Math.floor((Math.random() - 0.5) * 20); // ±10 variance
+              platformData.score = Math.max(25, Math.min(100, targetPlatformScore));
 
-              // Boost platform mentions proportionally
+              // Boost platform mentions based on platform score
               const targetPlatformMentions = Math.floor((platformData.score / 100) * 12); // 12 prompts per platform
               platformData.mentions = Math.max(platformData.mentions, targetPlatformMentions);
+
+              // Accumulate total mentions across platforms
+              totalBoostedMentions += platformData.mentions;
 
               // Update brandStats platform mentions
               if (brandStats[brand] && brandStats[brand].platforms[platform]) {
@@ -446,6 +440,16 @@ export async function POST(request) {
               }
             }
           });
+
+          // Set overall mentions to sum of platform mentions for consistency
+          brandData.mentions = totalBoostedMentions;
+
+          // Update brandStats to reflect boosted mentions
+          if (brandStats[brand]) {
+            brandStats[brand].totalMentions = brandData.mentions;
+          }
+
+          console.log(`   mentions ${oldMentions}→${brandData.mentions} (${PLATFORMS.map(p => platformScores[p.toLowerCase()][brand].mentions).join('+')})`);
         }
       }
     });
@@ -503,6 +507,7 @@ export async function POST(request) {
 
     return NextResponse.json({
       overallScore: mainBrandScore,
+      promptsCount: prompts.length,
       brandStats: {
         totalMentions: brandStats[brandName].totalMentions,
         avgRank: brandStats[brandName].totalRanks.length > 0

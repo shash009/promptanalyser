@@ -1,9 +1,10 @@
-'use client';
+ 'use client';
 
 import CompetitorChart from './CompetitorChart';
+import { formatRank, formatMentions } from '../utils/format';
 
 export default function ResultsDisplay({ results, brandName, onReset }) {
-  const { overallScore, platforms, competitorComparison, insights, recommendations } = results;
+  const { overallScore, platforms, competitorComparison, insights, recommendations, promptsCount } = results;
 
   const platformNames = ['ChatGPT', 'Gemini', 'Perplexity'];
 
@@ -23,7 +24,7 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
   };
 
   return (
-    <div className="w-full max-w-6xl mx-auto space-y-6">
+    <div className="w-full max-w-3xl mx-auto space-y-8 px-4">
       {/* Header with reset button */}
       <div className="flex justify-between items-center">
         <h2 className="text-2xl font-bold text-white">Analysis Results</h2>
@@ -36,7 +37,7 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
       </div>
 
       {/* Overall Score Card */}
-      <div className="bg-gray-900/50 border border-cyan-500/30 rounded-2xl p-8 backdrop-blur-sm shadow-xl text-center">
+      <div className="bg-gray-900/50 border border-cyan-500/30 rounded-2xl p-10 backdrop-blur-sm shadow-xl text-center">
         <h3 className="text-lg text-gray-400 mb-4">Overall Visibility Score</h3>
         <div className={`text-7xl font-bold mb-4 ${getScoreColor(overallScore)}`}>
           {overallScore}
@@ -51,7 +52,7 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
       </div>
 
       {/* Platform Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
         {platformNames.map((platformName) => {
           const platformKey = platformName.toLowerCase();
           const platformData = platforms[platformKey]?.[brandName] || {};
@@ -68,29 +69,23 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
           return (
             <div
               key={platformName}
-              className="bg-gray-900/50 border border-purple-500/30 rounded-xl p-6 hover:border-purple-500/50 transition-all"
+              className="bg-gray-900/50 border border-purple-500/30 rounded-xl p-8 hover:border-purple-500/50 transition-all"
             >
               <div className="flex items-center gap-2 mb-4">
                 <span className="text-3xl">{icons[platformKey]}</span>
                 <h4 className="text-lg font-bold text-white">{platformName}</h4>
               </div>
 
-              <div className={`text-4xl font-bold mb-2 ${getScoreColor(score)}`}>
-                {score}/100
-              </div>
-
-              <div className="space-y-2 text-sm text-gray-400">
-                <div className="flex justify-between">
-                  <span>Mentions:</span>
-                  <span className="text-white font-semibold">{mentions}/12</span>
-                </div>
-                {avgRank && (
-                  <div className="flex justify-between">
-                    <span>Avg Rank:</span>
-                    <span className="text-white font-semibold">#{avgRank}</span>
+                  <div className={`text-4xl font-bold mb-2 ${getScoreColor(score)}`}>
+                    {score}/100
                   </div>
-                )}
-              </div>
+
+                  <div className="space-y-2 text-sm text-gray-400">
+                    <div className="flex justify-between">
+                      <span>Mentions:</span>
+                      <span className="text-white font-semibold">{formatMentions(mentions, promptsCount || 12)}</span>
+                    </div>
+                  </div>
 
               {mentions > 0 && (
                 <div className="mt-3 text-emerald-400 text-sm flex items-center gap-1">
@@ -105,7 +100,7 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
 
       {/* Competitor Analysis */}
       {competitorComparison && competitorComparison.length > 1 && (
-        <CompetitorChart competitors={competitorComparison} brandName={brandName} />
+        <CompetitorChart competitors={competitorComparison} brandName={brandName} promptsCount={promptsCount} />
       )}
 
       {/* Insights and Recommendations */}

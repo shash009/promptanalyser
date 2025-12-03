@@ -48,7 +48,7 @@ export default function Home() {
 
   return (
     <div className="relative min-h-screen bg-gradient-to-br from-[#0A0F1F] via-[#111827] to-[#0A0F1F] py-12 px-4 flex flex-col items-center justify-center">
-      <div className="w-full max-w-7xl mx-auto">
+      <div className="w-full max-w-3xl mx-auto px-4">
         {/* Idle state - Show form */}
         {status === 'idle' && (
           <BrandForm onSubmit={handleSubmit} isLoading={false} />

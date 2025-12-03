@@ -38,8 +38,8 @@ export default function LoadingState() {
   }, []);
 
   return (
-    <div className="w-full max-w-2xl mx-auto">
-      <div className="bg-gray-900/50 border border-purple-500/30 rounded-2xl p-8 backdrop-blur-sm shadow-xl">
+    <div className="w-full max-w-xl mx-auto px-4 py-6">
+      <div className="bg-gray-900/50 border border-purple-500/30 rounded-2xl p-10 backdrop-blur-sm shadow-xl">
         {/* Title */}
         <div className="text-center mb-8">
           <h2 className="text-2xl font-bold text-white mb-2">

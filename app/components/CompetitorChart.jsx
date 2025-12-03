@@ -1,13 +1,16 @@
-'use client';
+ 'use client';
 
-export default function CompetitorChart({ competitors, brandName }) {
+import { formatMentions, formatRank } from '../utils/format';
+
+export default function CompetitorChart({ competitors, brandName, promptsCount }) {
   if (!competitors || competitors.length === 0) return null;
 
   // Sort by score (highest first)
   const sortedCompetitors = [...competitors].sort((a, b) => b.score - a.score);
 
   return (
-    <div className="bg-gray-900/50 border border-purple-500/30 rounded-xl p-6">
+    <div className="w-full max-w-3xl mx-auto px-4 py-6">
+      <div className="bg-gray-900/50 border border-purple-500/30 rounded-xl p-8">
       <h3 className="text-xl font-bold text-white mb-6 flex items-center gap-2">
         <span>🏆</span>
         Competitor Analysis
@@ -55,13 +58,8 @@ export default function CompetitorChart({ competitors, brandName }) {
                   {/* Stats */}
                   <div className="flex gap-4 mt-2 text-xs text-gray-400">
                     <span>
-                      {competitor.mentions} mentions
+                      {formatMentions(competitor.mentions || 0, promptsCount || 12)} mentions
                     </span>
-                    {competitor.avgRank && (
-                      <span>
-                        Avg rank: #{competitor.avgRank}
-                      </span>
-                    )}
                   </div>
                 </div>
               </div>
@@ -80,6 +78,7 @@ export default function CompetitorChart({ competitors, brandName }) {
           <div className="w-4 h-4 rounded bg-gradient-to-r from-purple-500 to-purple-600"></div>
           <span className="text-gray-400">Competitors</span>
         </div>
+      </div>
       </div>
     </div>
   );
