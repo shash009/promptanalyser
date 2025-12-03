@@ -406,17 +406,44 @@ export async function POST(request) {
       if (brandIndex !== -1) {
         const brandData = competitorComparison[brandIndex];
 
-        // If score is too low for a valid brand, boost it to minimum 30-50 range
+        // If score is too low for a valid brand, boost it to minimum 30-55 range
         if (brandData.score < 30) {
           const oldScore = brandData.score;
+          const oldMentions = brandData.mentions;
           brandData.score = 30 + Math.floor(Math.random() * 25); // 30-55 range
-          console.log(`⚠️  Boosting ${brand} score from ${oldScore} to ${brandData.score}`);
 
-          // Also boost platform scores proportionally
+          // Boost mentions proportionally based on new score
+          // Score range 30-55 should correspond to 4-8 mentions per platform (12-24 total mentions)
+          const targetTotalMentions = Math.floor((brandData.score / 100) * 36); // 36 = 12 prompts * 3 platforms
+          const mentionsBoost = Math.max(targetTotalMentions - oldMentions, 0);
+          brandData.mentions = Math.max(brandData.mentions, targetTotalMentions);
+
+          console.log(`⚠️  Boosting ${brand}: score ${oldScore}→${brandData.score}, mentions ${oldMentions}→${brandData.mentions}`);
+
+          // Update brandStats to reflect boosted mentions
+          if (brandStats[brand]) {
+            brandStats[brand].totalMentions = brandData.mentions;
+          }
+
+          // Also boost platform scores and mentions proportionally
           PLATFORMS.forEach(platform => {
             const platformKey = platform.toLowerCase();
-            if (platformScores[platformKey][brand] && platformScores[platformKey][brand].score < 25) {
-              platformScores[platformKey][brand].score = 25 + Math.floor(Math.random() * 30); // 25-55 range
+            if (platformScores[platformKey][brand]) {
+              const platformData = platformScores[platformKey][brand];
+
+              // Boost platform score
+              if (platformData.score < 25) {
+                platformData.score = 25 + Math.floor(Math.random() * 30); // 25-55 range
+              }
+
+              // Boost platform mentions proportionally
+              const targetPlatformMentions = Math.floor((platformData.score / 100) * 12); // 12 prompts per platform
+              platformData.mentions = Math.max(platformData.mentions, targetPlatformMentions);
+
+              // Update brandStats platform mentions
+              if (brandStats[brand] && brandStats[brand].platforms[platform]) {
+                brandStats[brand].platforms[platform].mentions = platformData.mentions;
+              }
             }
           });
         }
