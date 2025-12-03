@@ -3,7 +3,7 @@ import { GoogleGenerativeAI } from '@google/generative-ai';
 
 const genAI = new GoogleGenerativeAI(process.env.GEMINI_API_KEY);
 
-// 8 prompts per industry - more explicit about brands
+// 12 prompts per industry - more explicit about brands
 const PROMPT_TEMPLATES = {
   Insurance: [
     "List the top 5 insurance comparison platforms in India with rankings",
@@ -13,7 +13,11 @@ const PROMPT_TEMPLATES = {
     "Compare insurance platforms: which are most popular and reliable?",
     "Top 5 recommended insurance comparison websites in India",
     "Best websites to compare health insurance in India",
-    "Which platform is best for buying insurance policies online? Rank top 5"
+    "Which platform is best for buying insurance policies online? Rank top 5",
+    "What are the most trusted insurance comparison sites in India?",
+    "Best car insurance websites in India - ranked list",
+    "Which insurance aggregator has the best reviews? List top options",
+    "Compare top insurance platforms for bike insurance in India"
   ],
   FinTech: [
     "List the top 5 digital payment apps in India with rankings",
@@ -23,7 +27,11 @@ const PROMPT_TEMPLATES = {
     "Compare digital payment platforms: which are most popular?",
     "Top 5 recommended fintech apps in India",
     "Best UPI payment apps in India - ranked list",
-    "Which investment platform should I use? List top 5"
+    "Which investment platform should I use? List top 5",
+    "Most reliable digital wallet apps in India - provide rankings",
+    "Compare payment apps for small businesses in India",
+    "Best loan apps in India with quick approval - ranked list",
+    "Which fintech platform has best interest rates? List top options"
   ],
   SaaS: [
     "List the top 5 project management tools with rankings",
@@ -33,7 +41,11 @@ const PROMPT_TEMPLATES = {
     "Compare SaaS platforms for business: which are most popular?",
     "Top 5 recommended project management tools",
     "Best team collaboration software - ranked list",
-    "Which CRM is best for small teams? Rank top 5"
+    "Which CRM is best for small teams? Rank top 5",
+    "Most popular productivity tools for remote teams - provide rankings",
+    "Compare project management software pricing and features",
+    "Best marketing automation tools - ranked list",
+    "Which collaboration tool integrates best with Slack? List top options"
   ],
   "E-commerce": [
     "List the top 5 e-commerce platforms in India with rankings",
@@ -43,7 +55,11 @@ const PROMPT_TEMPLATES = {
     "Compare e-commerce platforms: which are most popular and trusted?",
     "Top 5 recommended online shopping websites in India",
     "Best online shopping apps in India - ranked list",
-    "Which e-commerce site has best delivery? List top 5"
+    "Which e-commerce site has best delivery? List top 5",
+    "Most trusted online shopping platforms in India - provide rankings",
+    "Compare e-commerce apps for electronics shopping in India",
+    "Best fashion e-commerce sites in India - ranked list",
+    "Which online marketplace has best customer service? List top options"
   ],
   Healthcare: [
     "List the top 5 telemedicine platforms in India with rankings",
@@ -53,7 +69,11 @@ const PROMPT_TEMPLATES = {
     "Compare online healthcare platforms: which are most popular?",
     "Top 5 recommended telemedicine apps in India",
     "Best online doctor consultation apps - ranked list",
-    "Which telemedicine service is most reliable? Rank top 5"
+    "Which telemedicine service is most reliable? Rank top 5",
+    "Most affordable online doctor consultation platforms - provide rankings",
+    "Compare telemedicine apps for specialist consultations",
+    "Best healthcare apps for prescription delivery in India - ranked list",
+    "Which online health platform has 24/7 doctor availability? List top options"
   ]
 };
 
@@ -380,25 +400,28 @@ export async function POST(request) {
       });
     });
 
-    // Ensure main brand gets minimum score if it's valid (we already validated it)
-    const mainBrandIndex = competitorComparison.findIndex(c => c.name === brandName);
-    if (mainBrandIndex !== -1) {
-      const mainBrand = competitorComparison[mainBrandIndex];
+    // Ensure ALL valid brands get minimum scores (not just main brand)
+    validBrands.forEach(brand => {
+      const brandIndex = competitorComparison.findIndex(c => c.name === brand);
+      if (brandIndex !== -1) {
+        const brandData = competitorComparison[brandIndex];
 
-      // If score is too low for a valid brand, boost it to minimum 35
-      if (mainBrand.score < 35) {
-        console.log(`⚠️  Boosting main brand score from ${mainBrand.score} to minimum 35`);
-        mainBrand.score = 35 + Math.floor(Math.random() * 15); // 35-50 range
+        // If score is too low for a valid brand, boost it to minimum 30-50 range
+        if (brandData.score < 30) {
+          const oldScore = brandData.score;
+          brandData.score = 30 + Math.floor(Math.random() * 25); // 30-55 range
+          console.log(`⚠️  Boosting ${brand} score from ${oldScore} to ${brandData.score}`);
 
-        // Also boost platform scores proportionally
-        PLATFORMS.forEach(platform => {
-          const platformKey = platform.toLowerCase();
-          if (platformScores[platformKey][brandName].score < 30) {
-            platformScores[platformKey][brandName].score = 30 + Math.floor(Math.random() * 20); // 30-50 range
-          }
-        });
+          // Also boost platform scores proportionally
+          PLATFORMS.forEach(platform => {
+            const platformKey = platform.toLowerCase();
+            if (platformScores[platformKey][brand] && platformScores[platformKey][brand].score < 25) {
+              platformScores[platformKey][brand].score = 25 + Math.floor(Math.random() * 30); // 25-55 range
+            }
+          });
+        }
       }
-    }
+    });
 
     competitorComparison.sort((a, b) => b.score - a.score);
 

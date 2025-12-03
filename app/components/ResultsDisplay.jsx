@@ -82,7 +82,7 @@ export default function ResultsDisplay({ results, brandName, onReset }) {
               <div className="space-y-2 text-sm text-gray-400">
                 <div className="flex justify-between">
                   <span>Mentions:</span>
-                  <span className="text-white font-semibold">{mentions}/8</span>
+                  <span className="text-white font-semibold">{mentions}/12</span>
                 </div>
                 {avgRank && (
                   <div className="flex justify-between">
